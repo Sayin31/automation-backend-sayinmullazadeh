@@ -3,19 +3,19 @@ const faker = require('faker')
 const ENDPOINT_GET_CLIENTS = 'http://localhost:3000/api/clients'
 const ENDPOINT_POST_CLIENT = 'http://localhost:3000/api/client/new'
 const ENDPOINT_GET_CLIENT = 'http://localhost:3000/api/client/'
+const ENDPOINT_PUT_CLIENT1 = 'http://localhost:3000/api/client/1'
+const ENDPOINT_PUT_CLIENT2 = 'http://localhost:3000/api/client/2'
 
 function createRandomClientPayload(){
     const fakeName = faker.name.firstName()
     const fakeEmail = faker.internet.email()
     const fakePhone = faker.phone.phoneNumber()
 
-
     const payload = {
         "name":fakeName,
         "email":fakeEmail,
         "telephone":fakePhone
     }
-
     return payload
 }
 
@@ -85,11 +85,7 @@ function deleteRequestAfterGet(cy){
 
 function createClientRequest(cy){
     cy.authenticateSession().then((response =>{
-        // const payload = {
-        //"name":"Tester123",
-        //"email":"tester123@test.com",
-        //"telephone":"123456789"
-    //}
+    
         let fakeClientPayload = createRandomClientPayload()
         cy.request({
         method: "POST",
@@ -98,10 +94,10 @@ function createClientRequest(cy){
             'X-User-Auth': JSON.stringify(Cypress.env().loginToken),
             'Content-Type': 'application/json'
         },
-        //body: payload
         body: fakeClientPayload
+
        }).then((response =>{
-         //cy.log(JSON.stringify(response))
+         
          const responseAsString = JSON.stringify(response)
          expect(responseAsString).to.have.string(fakeClientPayload.name)
        }))
@@ -110,14 +106,9 @@ function createClientRequest(cy){
     }))
 }
 
-
 function createClientRequestAndDelete(cy){
     cy.authenticateSession().then((response =>{
-        // const payload = {
-        //"name":"Tester123",
-        //"email":"tester123@test.com",
-        //"telephone":"123456789"
-    //}
+       
         let fakeClientPayload = createRandomClientPayload()
         cy.request({
         method: "POST",
@@ -126,10 +117,9 @@ function createClientRequestAndDelete(cy){
             'X-User-Auth': JSON.stringify(Cypress.env().loginToken),
             'Content-Type': 'application/json'
         },
-        //body: payload
         body: fakeClientPayload
+
        }).then((response =>{
-         //cy.log(JSON.stringify(response))
          const responseAsString = JSON.stringify(response)
          expect(responseAsString).to.have.string(fakeClientPayload.name)
        }))
@@ -137,12 +127,56 @@ function createClientRequestAndDelete(cy){
        // Delete
        deleteRequestAfterGet(cy)
     }))
-    
 }
 
+function editFirstClient(cy){
+    const editFirstClient = 
+    {
+        "id": 1,
+        "created": "2020-01-05T12:00:00.000Z",
+        "name": "Peter B. Parker",
+        "email": "peterbp@dailybugle.com",
+        "telephone": "42"
+    }
+    cy.authenticateSession().then((response =>{
+        cy.request({
+        method: "PUT",
+        url: ENDPOINT_PUT_CLIENT1,
+        headers:{
+            'X-User-Auth': JSON.stringify(Cypress.env().loginToken),
+            'Content-Type': 'application/json'
+        }, body:editFirstClient
+       })
+    }))
+}
+
+function editSecondClient(cy){
+    const editSecondClient = 
+    {
+        "id": 2,
+        "created": "2020-01-06T12:00:00.000Z",
+        "name": "Logan",
+        "email": "weaponx@xmen.com",
+        "telephone": "X"
+    }
+    cy.authenticateSession().then((response =>{
+        cy.request({
+        method: "PUT",
+        url: ENDPOINT_PUT_CLIENT2,
+        headers:{
+            'X-User-Auth': JSON.stringify(Cypress.env().loginToken),
+            'Content-Type': 'application/json'
+        }, body:editSecondClient
+       })
+    }))
+}
+
+// Export module
 module.exports = {
     createRandomClientPayload,
     createClientRequest,
     getAllClientsRequest,
-    createClientRequestAndDelete
+    createClientRequestAndDelete,
+    editFirstClient,
+    editSecondClient
 }
